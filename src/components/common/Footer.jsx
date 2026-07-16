@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa'
 import { RiCompassDiscoverLine } from 'react-icons/ri'
 import { motion } from 'framer-motion'
+import { fadeUp, staggerContainer } from '../../utils/transitions'
 
 const footerLinks = {
   Destinations: [
@@ -32,21 +34,51 @@ const socialLinks = [
   { icon: FaYoutube, href: '#', label: 'YouTube' },
 ]
 
+function SocialIcon({ social }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <motion.a
+      href={social.href}
+      aria-label={social.label}
+      whileHover={{ scale: 1.1, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      style={
+        hovered
+          ? { background: 'linear-gradient(135deg, #4F7CFF, #8B5CF6)', color: '#fff', borderColor: 'transparent' }
+          : {}
+      }
+      className="w-10 h-10 bg-surface-200/80 dark:bg-surface-800 rounded-full flex items-center justify-center text-surface-600 dark:text-slate-300 border border-surface-200 dark:border-surface-700/60 shadow-sm transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+    >
+      <social.icon className="w-4 h-4" />
+    </motion.a>
+  )
+}
+
 export default function Footer() {
   return (
-    <footer className="bg-surface-50 dark:bg-surface-950 text-surface-600 dark:text-slate-300 border-t border-surface-200/60 dark:border-surface-900 transition-colors duration-300">
+    <footer className="relative bg-surface-50 dark:bg-[#060B18] text-surface-600 dark:text-slate-200 transition-colors duration-300">
+      {/* Gradient top separator */}
+      <div className="h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10">
-        
+
         {/* Top section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-surface-200/60 dark:border-surface-900">
-          
-          {/* Brand Column (col-span-5) */}
-          <div className="lg:col-span-5 space-y-6">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-surface-200/60 dark:border-surface-800/80"
+        >
+          {/* Brand Column */}
+          <motion.div variants={fadeUp} className="lg:col-span-5 space-y-6">
             <Link to="/" className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-lg">
               <span className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow duration-300">
                 <RiCompassDiscoverLine className="w-6 h-6 text-white" />
               </span>
-              <span className="text-2xl font-bold font-heading text-surface-900 dark:text-white tracking-tight group-hover:text-primary-600 transition-colors duration-200">
+              <span className="text-2xl font-bold font-heading text-surface-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
                 Travel<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-400">Scape</span>
               </span>
             </Link>
@@ -54,32 +86,26 @@ export default function Footer() {
               Discover extraordinary destinations and create unforgettable memories. Your next adventure starts with TravelScape.
             </p>
             <div className="space-y-3.5 pt-2">
-              <div className="flex items-center gap-3 text-sm text-surface-600 dark:text-slate-300">
-                <div className="w-8 h-8 rounded-lg bg-surface-200/60 dark:bg-surface-900 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 border border-transparent dark:border-surface-800">
-                  <FiMapPin className="w-4 h-4" />
+              {[
+                { icon: FiMapPin, text: '123 Travel Street, San Francisco, CA' },
+                { icon: FiMail, text: 'hello@travelscape.com' },
+                { icon: FiPhone, text: '+1 (555) 123-4567' },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-3 text-sm text-surface-600 dark:text-slate-300">
+                  <div className="w-8 h-8 rounded-lg bg-surface-200/60 dark:bg-surface-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 border border-transparent dark:border-surface-800/60">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="font-light">{text}</span>
                 </div>
-                <span className="font-light">123 Travel Street, San Francisco, CA</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-surface-600 dark:text-slate-300">
-                <div className="w-8 h-8 rounded-lg bg-surface-200/60 dark:bg-surface-900 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 border border-transparent dark:border-surface-800">
-                  <FiMail className="w-4 h-4" />
-                </div>
-                <span className="font-light">hello@travelscape.com</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-surface-600 dark:text-slate-300">
-                <div className="w-8 h-8 rounded-lg bg-surface-200/60 dark:bg-surface-900 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 border border-transparent dark:border-surface-800">
-                  <FiPhone className="w-4 h-4" />
-                </div>
-                <span className="font-light">+1 (555) 123-4567</span>
-              </div>
+              ))}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Spacer column for larger screens */}
+          {/* Spacer */}
           <div className="hidden lg:block lg:col-span-1" />
 
-          {/* Link Columns (col-span-6) */}
-          <div className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          {/* Link Columns */}
+          <motion.div variants={fadeUp} className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title} className="space-y-5">
                 <h4 className="text-surface-800 dark:text-white font-extrabold text-xs uppercase tracking-widest font-heading">{title}</h4>
@@ -97,9 +123,8 @@ export default function Footer() {
                 </ul>
               </div>
             ))}
-          </div>
-
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8">
@@ -108,16 +133,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-3.5">
             {socialLinks.map((social) => (
-              <motion.a
-                key={social.label}
-                href={social.href}
-                aria-label={social.label}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 bg-surface-200/80 dark:bg-surface-900 hover:bg-gradient-to-br hover:from-primary-500 hover:to-accent-500 hover:text-white rounded-full flex items-center justify-center text-surface-600 dark:text-slate-300 border border-transparent dark:border-surface-800 shadow-sm transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-              >
-                <social.icon className="w-4 h-4" />
-              </motion.a>
+              <SocialIcon key={social.label} social={social} />
             ))}
           </div>
         </div>

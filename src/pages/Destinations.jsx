@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import useFetch from '../hooks/useFetch'
 import DestinationCard from '../components/cards/DestinationCard'
 import SearchBar from '../components/common/SearchBar'
 import useDebounce from '../hooks/useDebounce'
 import { FiSliders } from 'react-icons/fi'
+import { staggerContainer, staggerChild } from '../utils/transitions'
 
 export default function Destinations() {
   const [search, setSearch] = useState('')
@@ -68,7 +69,7 @@ export default function Destinations() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen pt-24 pb-16"
+      className="min-h-screen pt-24 pb-16 bg-white dark:bg-[#070B1A] text-surface-900 dark:text-white transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -78,10 +79,10 @@ export default function Destinations() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading">
+          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading tracking-tight">
             Explore Destinations
           </h1>
-          <p className="text-surface-500 dark:text-[#94A3B8] max-w-2xl mx-auto text-lg">
+          <p className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-lg font-light">
             From tropical paradises to mountain retreats — find your perfect getaway
           </p>
         </motion.div>
@@ -121,8 +122,8 @@ export default function Destinations() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden"
               >
-                <div className="bg-white/90 dark:bg-surface-800/60 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-surface-200/60 dark:border-surface-700/80 shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] space-y-6 mt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 divide-y md:divide-y-0 md:divide-x divide-surface-200 dark:divide-surface-700/80">
+                <div className="bg-white/90 dark:bg-surface-800/80 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-surface-200/60 dark:border-surface-700/60 shadow-premium space-y-6 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 divide-y md:divide-y-0 md:divide-x divide-surface-200 dark:divide-surface-700/60">
                     
                     {/* Location Column (col-span-6) */}
                     <div className="md:col-span-6 space-y-3">
@@ -135,7 +136,7 @@ export default function Destinations() {
                             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
                               location === loc
                                 ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
-                                : 'bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 text-surface-600 dark:text-slate-300 hover:bg-surface-100 dark:hover:bg-surface-800 hover:border-surface-300 dark:hover:border-surface-600'
+                                : 'bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-slate-300 hover:bg-surface-100 dark:hover:bg-surface-800 hover:border-surface-300 dark:hover:border-surface-600'
                             }`}
                           >
                             {loc}
@@ -176,7 +177,7 @@ export default function Destinations() {
                           onChange={(e) => setPriceRange([0, Number(e.target.value)])}
                           className="w-full h-1.5 bg-surface-100 dark:bg-surface-900 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
-                        <div className="flex justify-between text-[10px] font-bold text-surface-400 mt-2">
+                        <div className="flex justify-between text-[10px] font-bold text-surface-450 mt-2">
                           <span>$0</span>
                           <span>$1,000</span>
                         </div>
@@ -191,22 +192,45 @@ export default function Destinations() {
         </motion.div>
 
         {/* Results count */}
-        <p className="text-sm text-surface-500 dark:text-[#94A3B8] mb-6">{filtered.length} destinations found</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-surface-500 dark:text-slate-400 mb-6 font-medium"
+        >
+          {filtered.length} destinations found
+        </motion.p>
 
         {/* Results */}
         {loading ? (
-          <div className="text-center py-20">Loading destinations...</div>
-        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="bg-white dark:bg-surface-800/40 rounded-2xl border border-surface-100 dark:border-surface-700/60 p-5 space-y-4">
+                <div className="aspect-[4/3] skeleton w-full" />
+                <div className="h-6 skeleton w-3/4" />
+                <div className="h-4 skeleton w-full" />
+                <div className="flex justify-between items-center pt-2">
+                  <div className="h-5 skeleton w-1/3" />
+                  <div className="h-8 skeleton w-1/4 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
             {filtered.map((dest, i) => (
               <DestinationCard key={dest._id} destination={dest} index={i} />
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="text-center py-20">
+          <div className="text-center py-20 bg-surface-50 dark:bg-surface-800/20 rounded-3xl border border-surface-200/40 dark:border-surface-700/60">
             <p className="text-4xl mb-4">🏝️</p>
-            <p className="text-xl font-semibold text-surface-700 dark:text-white mb-2">No destinations found</p>
-            <p className="text-surface-500 dark:text-[#94A3B8]">Try adjusting your search or filters</p>
+            <p className="text-xl font-bold text-surface-700 dark:text-white mb-2">No destinations found</p>
+            <p className="text-surface-500 dark:text-slate-400 font-light">Try adjusting your search or filters</p>
           </div>
         )}
       </div>

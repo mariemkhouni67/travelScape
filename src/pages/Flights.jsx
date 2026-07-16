@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import useFetch from '../hooks/useFetch'
 import FlightCard from '../components/cards/FlightCard'
-import { FiSearch } from 'react-icons/fi'
 import { MdFlightTakeoff } from 'react-icons/md'
+import { staggerContainer } from '../utils/transitions'
 
 export default function Flights() {
   const [from, setFrom] = useState('')
@@ -43,7 +43,7 @@ export default function Flights() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen pt-24 pb-16"
+      className="min-h-screen pt-24 pb-16 bg-white dark:bg-[#070B1A] text-surface-900 dark:text-white transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -52,10 +52,10 @@ export default function Flights() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading">
+          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading tracking-tight">
             Search Flights
           </h1>
-          <p className="text-surface-500 dark:text-[#94A3B8] max-w-2xl mx-auto text-lg">
+          <p className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-lg font-light">
             Find the best deals on flights to destinations around the world
           </p>
         </motion.div>
@@ -65,11 +65,11 @@ export default function Flights() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/90 dark:bg-surface-800/60 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-surface-200/60 dark:border-surface-700/80 shadow-[0_20px_50px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] mb-10"
+          className="bg-white/95 dark:bg-surface-850/80 dark:backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-surface-200 dark:border-surface-700/60 shadow-premium mb-10"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-slate-400 mb-2">From</label>
+              <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-2">From</label>
               <div className="relative">
                 <MdFlightTakeoff className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-slate-400" />
                 <input
@@ -77,12 +77,12 @@ export default function Flights() {
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
                   placeholder="Departure city"
-                  className="w-full pl-10 pr-4 py-3 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 rounded-xl text-sm font-medium text-surface-850 dark:text-white placeholder-surface-400 dark:placeholder-slate-400 outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300"
+                  className="input-field pl-10"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-slate-400 mb-2">To</label>
+              <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-2">To</label>
               <div className="relative">
                 <MdFlightTakeoff className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400 dark:text-slate-400 rotate-90" />
                 <input
@@ -90,22 +90,22 @@ export default function Flights() {
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   placeholder="Destination city"
-                  className="w-full pl-10 pr-4 py-3 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 rounded-xl text-sm font-medium text-surface-850 dark:text-white placeholder-surface-400 dark:placeholder-slate-400 outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300"
+                  className="input-field pl-10"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-slate-400 mb-2">Date</label>
+              <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-2">Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 rounded-xl text-sm font-medium text-surface-850 dark:text-white outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300"
+                className="input-field dark:[color-scheme:dark]"
               />
             </div>
             <div className="flex flex-col justify-between">
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-slate-400">Max Price</label>
+                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300">Max Price</label>
                 <span className="text-sm font-extrabold text-primary-600 dark:text-primary-400">${maxPrice}</span>
               </div>
               <div className="flex items-center gap-3 pt-1">
@@ -116,16 +116,16 @@ export default function Flights() {
                   step="50"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="flex-1 h-1.5 bg-surface-100 dark:bg-surface-900 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                  className="w-full h-1.5 bg-surface-100 dark:bg-surface-900 rounded-lg appearance-none cursor-pointer accent-primary-500"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-slate-400 mb-2">Sort</label>
+              <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-2">Sort</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-3 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700/60 rounded-xl text-sm font-semibold text-surface-850 dark:text-white outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300"
+                className="input-field"
               >
                 <option value="price-low" className="bg-white dark:bg-surface-800 text-surface-800 dark:text-white">Price: Low to High</option>
                 <option value="price-high" className="bg-white dark:bg-surface-800 text-surface-800 dark:text-white">Price: High to Low</option>
@@ -136,21 +136,46 @@ export default function Flights() {
         </motion.div>
 
         {/* Results */}
-        <p className="text-sm text-surface-500 dark:text-[#94A3B8] mb-6">{filtered.length} flights found</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-surface-500 dark:text-slate-400 mb-6 font-medium"
+        >
+          {filtered.length} flights found
+        </motion.p>
 
         {loading ? (
-          <div className="text-center py-20">Loading flights...</div>
-        ) : filtered.length > 0 ? (
           <div className="space-y-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white dark:bg-surface-800/40 rounded-2xl border border-surface-100 dark:border-surface-700/60 p-6 space-y-4 shadow-sm animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 skeleton rounded-xl" />
+                  <div className="h-5 skeleton w-1/4" />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-6 pt-2">
+                  <div className="h-6 skeleton w-1/3" />
+                  <div className="h-6 skeleton w-1/4 mx-auto" />
+                  <div className="h-6 skeleton w-1/3 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="space-y-4"
+          >
             {filtered.map((flight, i) => (
               <FlightCard key={flight._id} flight={flight} index={i} />
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="text-center py-20">
+          <div className="text-center py-20 bg-surface-50 dark:bg-surface-800/20 rounded-3xl border border-surface-200/40 dark:border-surface-700/60">
             <p className="text-4xl mb-4">✈️</p>
-            <p className="text-xl font-semibold text-surface-700 dark:text-white mb-2">No flights found</p>
-            <p className="text-surface-500 dark:text-[#94A3B8]">Try different search criteria</p>
+            <p className="text-xl font-bold text-surface-700 dark:text-white mb-2">No flights found</p>
+            <p className="text-surface-500 dark:text-slate-400 font-light">Try different search criteria</p>
           </div>
         )}
       </div>

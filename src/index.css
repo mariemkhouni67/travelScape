@@ -110,10 +110,6 @@
 }
 
 /* ============================================
-   Base Styles
-   ============================================ */
-
-/* ============================================
    Base Layer — Styles for HTML elements
    ============================================ */
 @layer base {
@@ -125,19 +121,18 @@
     @apply bg-white text-surface-800;
   }
 
-  /* Smooth theme transition for all elements */
+  /*
+   * CRITICAL FIX: Do NOT include `transform` in the global transition.
+   * Including transform here fights Framer Motion — it overrides the library's
+   * easing/spring calculations with a flat CSS transition on every frame.
+   * Only non-layout/non-animation properties are safe to transition globally.
+   */
   *,
   *::before,
   *::after {
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-    transition-duration: 300ms;
-    transition-timing-function: ease-in-out;
-  }
-
-  /* Exclude elements that have their own transform/animation timing */
-  [style*="animation"],
-  [class*="animate-"] {
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
   }
 
   /* Focus styles */
@@ -156,7 +151,7 @@
    Utilities Layer — Custom styling classes
    ============================================ */
 @layer utilities {
-  /* Glass morphism */
+  /* Glass morphism — use only on single-element contexts (navbar, hero search, modals) */
   .glass {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
@@ -168,7 +163,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  /* Premium glassmorphism with high light transmission */
+  /* Premium glassmorphism — single-element contexts only */
   .glass-premium {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(20px) saturate(160%);
@@ -182,21 +177,35 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  /* Layered soft shadows */
+  /*
+   * Layered soft shadows — improved from original.
+   * Light mode: genuine multi-layer depth.
+   * Dark mode: subtle glow instead of nothing (was `box-shadow: none`).
+   */
   .shadow-premium {
-    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.04), 0 4px 12px -5px rgba(0, 0, 0, 0.02);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 6px 16px -4px rgba(0, 0, 0, 0.06),
+      0 12px 30px -8px rgba(0, 0, 0, 0.04);
   }
   .dark .shadow-premium {
-    box-shadow: none;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .shadow-premium-hover {
-    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.08), 0 10px 20px -10px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.04),
+      0 16px 40px -8px rgba(0, 0, 0, 0.10),
+      0 32px 60px -16px rgba(0, 0, 0, 0.06);
   }
   .dark .shadow-premium-hover {
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    border-color: rgba(79, 124, 255, 0.25);
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.5),
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(79, 124, 255, 0.2);
   }
 
   /* Gradient text */
@@ -204,20 +213,50 @@
     @apply bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent;
   }
 
+  /*
+   * Shared form input field — light + dark in one class.
+   * Use instead of repeating 8+ individual classes per input.
+   * Applied to: all form inputs across Login, Register, Contact, HotelDetail, Flights, Booking.
+   */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm font-medium outline-none transition-all duration-200;
+    @apply bg-surface-50 border border-surface-200 text-surface-800 placeholder-surface-400;
+    @apply dark:bg-surface-800/80 dark:border-surface-700/60 dark:text-white dark:placeholder-slate-400;
+    @apply focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10;
+    @apply dark:focus:border-primary-400 dark:focus:ring-primary-400/10;
+  }
+
   /* Skeleton loader */
   .skeleton {
-    @apply rounded-lg;
+    @apply rounded-xl;
     background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
   }
   .dark .skeleton {
-    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background: linear-gradient(90deg, #1e2d47 25%, #243352 50%, #1e2d47 75%);
     background-size: 200% 100%;
   }
 }
 
-/* Scrollbar styling (remains outside layers for vendor prefixes) */
+/* ============================================
+   Reduced Motion — Accessibility
+   Users who set "Reduce Motion" in OS settings
+   get instant transitions, no keyframe animations.
+   Framer Motion also reads this via MotionConfig reducedMotion="user".
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 50ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -247,4 +286,3 @@
 :is(.dark) ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
-

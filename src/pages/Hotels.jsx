@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import useFetch from '../hooks/useFetch'
 import HotelCard from '../components/cards/HotelCard'
 import SearchBar from '../components/common/SearchBar'
 import useDebounce from '../hooks/useDebounce'
 import { FiSliders } from 'react-icons/fi'
+import { staggerContainer } from '../utils/transitions'
 
 export default function Hotels() {
   const [search, setSearch] = useState('')
@@ -68,7 +69,7 @@ export default function Hotels() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen pt-24 pb-16"
+      className="min-h-screen pt-24 pb-16 bg-white dark:bg-[#070B1A] text-surface-900 dark:text-white transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -77,10 +78,10 @@ export default function Hotels() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading">
+          <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading tracking-tight">
             Find Your Perfect Stay
           </h1>
-          <p className="text-surface-500 dark:text-[#94A3B8] max-w-2xl mx-auto text-lg">
+          <p className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-lg font-light">
             Browse luxury hotels and resorts worldwide, with amenities to match every travel style
           </p>
         </motion.div>
@@ -98,7 +99,7 @@ export default function Hotels() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-3 bg-white/80 dark:bg-surface-800/40 border border-surface-200 dark:border-surface-700/80 rounded-xl text-sm font-semibold text-surface-700 dark:text-slate-200 outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 backdrop-blur-md"
+                className="px-4 py-3 bg-white/80 dark:bg-surface-800/60 border border-surface-200 dark:border-surface-700/80 rounded-xl text-sm font-semibold text-surface-700 dark:text-slate-200 outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all duration-300 backdrop-blur-md"
               >
                 {sortOptions.map(opt => (
                   <option key={opt.value} value={opt.value} className="bg-white dark:bg-surface-800 text-surface-800 dark:text-white">{opt.label}</option>
@@ -127,8 +128,8 @@ export default function Hotels() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden"
               >
-                <div className="bg-white/90 dark:bg-surface-800/60 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-surface-200/60 dark:border-surface-700/80 shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] space-y-6 mt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 divide-y md:divide-y-0 md:divide-x divide-surface-200 dark:divide-surface-700/80">
+                <div className="bg-white/90 dark:bg-surface-800/80 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-surface-200/60 dark:border-surface-700/60 shadow-premium space-y-6 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 divide-y md:divide-y-0 md:divide-x divide-surface-200 dark:divide-surface-700/60">
                     
                     {/* Price Range */}
                     <div className="md:col-span-3 space-y-3">
@@ -146,7 +147,7 @@ export default function Hotels() {
                           onChange={(e) => setMaxPrice(Number(e.target.value))}
                           className="w-full h-1.5 bg-surface-100 dark:bg-surface-900 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
-                        <div className="flex justify-between text-[10px] font-bold text-surface-400 mt-2">
+                        <div className="flex justify-between text-[10px] font-bold text-surface-450 mt-2">
                           <span>$50</span>
                           <span>$2,000</span>
                         </div>
@@ -169,7 +170,7 @@ export default function Hotels() {
                           onChange={(e) => setMinRating(Number(e.target.value))}
                           className="w-full h-1.5 bg-surface-100 dark:bg-surface-900 rounded-lg appearance-none cursor-pointer accent-primary-500"
                         />
-                        <div className="flex justify-between text-[10px] font-bold text-surface-400 mt-2">
+                        <div className="flex justify-between text-[10px] font-bold text-surface-450 mt-2">
                           <span>0★</span>
                           <span>5★</span>
                         </div>
@@ -206,21 +207,50 @@ export default function Hotels() {
           </AnimatePresence>
         </motion.div>
 
-        <p className="text-sm text-surface-500 dark:text-[#94A3B8] mb-6">{filtered.length} hotels found</p>
+        {/* Results count */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-surface-500 dark:text-slate-400 mb-6 font-medium"
+        >
+          {filtered.length} hotels found
+        </motion.p>
 
+        {/* Results */}
         {loading ? (
-          <div className="text-center py-20">Loading hotels...</div>
-        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div key={n} className="bg-white dark:bg-surface-800/40 rounded-2xl border border-surface-100 dark:border-surface-700/60 p-5 space-y-4">
+                <div className="aspect-[4/3] skeleton w-full" />
+                <div className="h-6 skeleton w-3/4" />
+                <div className="h-4 skeleton w-full" />
+                <div className="flex gap-2">
+                  <div className="h-5 skeleton w-1/4 rounded-lg" />
+                  <div className="h-5 skeleton w-1/4 rounded-lg" />
+                </div>
+                <div className="flex justify-between items-center pt-3 border-t border-surface-100 dark:border-surface-700/80">
+                  <div className="h-6 skeleton w-1/3" />
+                  <div className="h-10 skeleton w-1/3 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {filtered.map((hotel, i) => (
               <HotelCard key={hotel._id} hotel={hotel} index={i} />
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <div className="text-center py-20">
+          <div className="text-center py-20 bg-surface-50 dark:bg-surface-800/20 rounded-3xl border border-surface-200/40 dark:border-surface-700/60">
             <p className="text-4xl mb-4">🏨</p>
-            <p className="text-xl font-semibold text-surface-700 dark:text-white mb-2">No hotels found</p>
-            <p className="text-surface-500 dark:text-[#94A3B8]">Try adjusting your filters</p>
+            <p className="text-xl font-bold text-surface-700 dark:text-white mb-2">No hotels found</p>
+            <p className="text-surface-500 dark:text-slate-400 font-light">Try adjusting your filters</p>
           </div>
         )}
       </div>
