@@ -55,9 +55,14 @@
   --color-surface-500: #5a6885;
   --color-surface-600: #3f4f72;
   --color-surface-700: #18233D; /* Surface Hover / Border highlight */
+  --color-surface-750: #151f36; /* Between 700 and 800 — used for card backgrounds */
   --color-surface-800: #121A2E; /* Surface Card */
+  --color-surface-850: #0f1727; /* Between 800 and 900 — used for glassmorphic panels */
   --color-surface-900: #0c1222;
   --color-surface-950: #070B1A; /* Base Background */
+
+  /* Extended Slate — fills gap between slate-300 and slate-400 */
+  --color-slate-350: #aab4c8;
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
