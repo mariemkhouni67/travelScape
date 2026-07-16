@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode toggling */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================
+   TravelScape Design System — Tailwind CSS v4
+   ============================================ */
+
+@theme {
+  /* Brand Colors (Primary: #4F7CFF, Secondary: #8B5CF6) */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #dbe4ff;
+  --color-primary-200: #bfceff;
+  --color-primary-300: #93b0ff;
+  --color-primary-400: #668fff;
+  --color-primary-500: #4F7CFF;
+  --color-primary-600: #3b65e6;
+  --color-primary-700: #2b4ecc;
+  --color-primary-800: #1c36b3;
+  --color-primary-900: #102199;
+  --color-primary-950: #081066;
+
+  --color-accent-50: #f5f3ff;
+  --color-accent-100: #ede9fe;
+  --color-accent-200: #ddd6fe;
+  --color-accent-300: #c4b5fd;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8B5CF6;
+  --color-accent-600: #7c3aed;
+  --color-accent-700: #6d28d9;
+  --color-accent-800: #5b21b6;
+  --color-accent-900: #4c1d95;
+
+  --color-coral-50: #fff7ed;
+  --color-coral-100: #ffedd5;
+  --color-coral-200: #fed7aa;
+  --color-coral-300: #fdba74;
+  --color-coral-400: #fb923c;
+  --color-coral-500: #f97316;
+  --color-coral-600: #ea580c;
+
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-warning-500: #eab308;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+
+  /* Surface Colors (Background: #070B1A, Surface: #121A2E, Hover: #18233D) */
+  --color-surface-50: #f7f9fc;
+  --color-surface-100: #eef1f6;
+  --color-surface-200: #d3d9e6;
+  --color-surface-300: #B7C0D1; /* Secondary Text */
+  --color-surface-400: #7C879E; /* Muted Text */
+  --color-surface-500: #5a6885;
+  --color-surface-600: #3f4f72;
+  --color-surface-700: #18233D; /* Surface Hover / Border highlight */
+  --color-surface-800: #121A2E; /* Surface Card */
+  --color-surface-900: #0c1222;
+  --color-surface-950: #070B1A; /* Base Background */
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Inter', system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.6s ease-out;
+  --animate-slide-up: slide-up 0.6s ease-out;
+  --animate-slide-down: slide-down 0.4s ease-out;
+  --animate-scale-in: scale-in 0.3s ease-out;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+}
+
+/* Keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1.5deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+/* ============================================
+   Base Layer — Styles for HTML elements
+   ============================================ */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    @apply bg-white text-surface-800;
+  }
+
+  /* Smooth theme transition for all elements */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 300ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  /* Exclude elements that have their own transform/animation timing */
+  [style*="animation"],
+  [class*="animate-"] {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-bold text-surface-900 dark:text-white;
+  }
+}
+
+/* ============================================
+   Utilities Layer — Custom styling classes
+   ============================================ */
+@layer utilities {
+  /* Glass morphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .dark .glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Premium glassmorphism with high light transmission */
+  .glass-premium {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .dark .glass-premium {
+    background: rgba(18, 26, 46, 0.65);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Layered soft shadows */
+  .shadow-premium {
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.04), 0 4px 12px -5px rgba(0, 0, 0, 0.02);
+  }
+  .dark .shadow-premium {
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .shadow-premium-hover {
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.08), 0 10px 20px -10px rgba(0, 0, 0, 0.04);
+  }
+  .dark .shadow-premium-hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border-color: rgba(79, 124, 255, 0.25);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent;
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply rounded-lg;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+  .dark .skeleton {
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+  }
+}
+
+/* Scrollbar styling (remains outside layers for vendor prefixes) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-100;
+}
+.dark ::-webkit-scrollbar-track,
+:is(.dark) ::-webkit-scrollbar-track {
+  background: #0B1120;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-300 rounded-full;
+}
+.dark ::-webkit-scrollbar-thumb,
+:is(.dark) ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-400;
+}
+.dark ::-webkit-scrollbar-thumb:hover,
+:is(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
