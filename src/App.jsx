@@ -21,14 +21,18 @@ import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
 import Dashboard from './pages/admin/Dashboard'
 
+import TravelStripBackground from './components/common/TravelStripBackground'
+
 function App() {
   const location = useLocation()
+  const showBg = !location.pathname.startsWith('/admin')
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-[#050816] text-surface-900 dark:text-white transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#050816] text-surface-900 dark:text-white transition-colors duration-300 relative overflow-hidden travel-strip-bg-active">
+      {showBg && <TravelStripBackground />}
       <Navbar />
       
-      <main className="flex-grow">
+      <main className="flex-grow relative">
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
             {/* Public Routes */}

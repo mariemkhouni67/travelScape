@@ -40,16 +40,15 @@ function SocialIcon({ social }) {
     <motion.a
       href={social.href}
       aria-label={social.label}
-      whileHover={{ scale: 1.1, y: -2 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.08, y: -2 }}
+      whileTap={{ scale: 0.96 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      style={
-        hovered
-          ? { background: 'linear-gradient(135deg, #4F7CFF, #8B5CF6)', color: '#fff', borderColor: 'transparent' }
-          : {}
-      }
-      className="w-10 h-10 bg-surface-200/80 dark:bg-surface-800 rounded-full flex items-center justify-center text-surface-600 dark:text-slate-300 border border-surface-200 dark:border-surface-700/60 shadow-sm transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+      style={{
+        background: hovered ? 'linear-gradient(135deg, rgba(79, 124, 255, 0.9), rgba(139, 92, 246, 0.9))' : 'rgba(255, 255, 255, 0.05)',
+        borderColor: hovered ? 'transparent' : 'rgba(255, 255, 255, 0.08)'
+      }}
+      className="w-10 h-10 rounded-full flex items-center justify-center text-white/72 hover:text-white border shadow-sm transition-all duration-300 backdrop-blur-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
     >
       <social.icon className="w-4 h-4" />
     </motion.a>
@@ -58,11 +57,23 @@ function SocialIcon({ social }) {
 
 export default function Footer() {
   return (
-    <footer className="relative bg-surface-50 dark:bg-[#060B18] text-surface-600 dark:text-slate-200 transition-colors duration-300">
-      {/* Gradient top separator */}
-      <div className="h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent" />
+    <footer 
+      style={{
+        background: 'rgba(8, 12, 24, 0.25)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+      }}
+      className="relative text-white/72 transition-colors duration-300 overflow-hidden"
+    >
+      {/* 🌫️ Smooth transparent gradient transition from the section above */}
+      <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[#070B1A] to-transparent pointer-events-none z-10" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10">
+      {/* Subtle corner glows (blue/purple) */}
+      <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10 relative z-20">
 
         {/* Top section */}
         <motion.div
@@ -70,7 +81,7 @@ export default function Footer() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-surface-200/60 dark:border-surface-800/80"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-white/8"
         >
           {/* Brand Column */}
           <motion.div variants={fadeUp} className="lg:col-span-5 space-y-6">
@@ -78,11 +89,11 @@ export default function Footer() {
               <span className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25 group-hover:shadow-primary-500/40 transition-shadow duration-300">
                 <RiCompassDiscoverLine className="w-6 h-6 text-white" />
               </span>
-              <span className="text-2xl font-bold font-heading text-surface-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+              <span className="text-2xl font-bold font-heading text-white tracking-tight group-hover:text-primary-400 transition-colors duration-200">
                 Travel<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-accent-400">Scape</span>
               </span>
             </Link>
-            <p className="text-sm text-surface-500 dark:text-slate-400 leading-relaxed max-w-sm font-light">
+            <p className="text-sm text-white/72 leading-relaxed max-w-sm font-light">
               Discover extraordinary destinations and create unforgettable memories. Your next adventure starts with TravelScape.
             </p>
             <div className="space-y-3.5 pt-2">
@@ -91,8 +102,8 @@ export default function Footer() {
                 { icon: FiMail, text: 'hello@travelscape.com' },
                 { icon: FiPhone, text: '+1 (555) 123-4567' },
               ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-3 text-sm text-surface-600 dark:text-slate-300">
-                  <div className="w-8 h-8 rounded-lg bg-surface-200/60 dark:bg-surface-900/60 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 border border-transparent dark:border-surface-800/60">
+                <div key={text} className="flex items-center gap-3 text-sm text-white/72">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary-400 flex-shrink-0 border border-white/8">
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className="font-light">{text}</span>
@@ -108,13 +119,13 @@ export default function Footer() {
           <motion.div variants={fadeUp} className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title} className="space-y-5">
-                <h4 className="text-surface-800 dark:text-white font-extrabold text-xs uppercase tracking-widest font-heading">{title}</h4>
+                <h4 className="text-white/95 font-extrabold text-xs uppercase tracking-widest font-heading">{title}</h4>
                 <ul className="space-y-3">
                   {links.map((link) => (
                     <li key={link.label}>
                       <Link
                         to={link.path}
-                        className="text-sm text-surface-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 font-light transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded px-1 -mx-1"
+                        className="text-sm text-white/72 hover:text-primary-400 font-light transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded px-1 -mx-1"
                       >
                         {link.label}
                       </Link>
@@ -128,7 +139,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8">
-          <p className="text-xs sm:text-sm text-surface-500 dark:text-slate-400 font-light">
+          <p className="text-xs sm:text-sm text-white/72 font-light">
             © {new Date().getFullYear()} TravelScape. All rights reserved. Built with passion for explorers.
           </p>
           <div className="flex items-center gap-3.5">

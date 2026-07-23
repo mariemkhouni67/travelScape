@@ -55,7 +55,7 @@ export default function StatsCounter() {
   ] : defaultStats
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white via-surface-50 to-surface-50 dark:from-[#050816] dark:via-[#070B18] dark:to-[#070B18] transition-colors duration-300">
+    <section className="py-24 relative transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}

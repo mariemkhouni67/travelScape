@@ -254,7 +254,7 @@ export default function ExploreMap() {
   const destWithCoords = destinations.filter(d => COORDS[d._id])
 
   return (
-    <section style={{ paddingTop: 80, paddingBottom: 80, background: 'linear-gradient(to bottom, #f7f9fc, #070B1A)', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ paddingTop: 80, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>
       {/* Inject CSS */}
       <style>{DARK_MAP_CSS}</style>
 

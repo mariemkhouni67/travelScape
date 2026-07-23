@@ -9,7 +9,7 @@ export default function PopularHotels() {
   const popular = [...hotels].sort((a, b) => b.rating - a.rating).slice(0, 3)
 
   return (
-    <section className="py-20 bg-surface-50 dark:bg-[#070B18] transition-colors duration-300">
+    <section className="py-20 relative transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial="hidden"

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Satisfy&family=Caveat:wght@500;700&display=swap');
 @import "tailwindcss";
 
 /* Enable class-based dark mode toggling */
@@ -67,6 +68,7 @@
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-script: 'Satisfy', 'Caveat', cursive;
 
   /* Animations */
   --animate-fade-in: fade-in 0.6s ease-out;
@@ -126,6 +128,10 @@
     @apply bg-white text-surface-800;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+  
   /*
    * CRITICAL FIX: Do NOT include `transform` in the global transition.
    * Including transform here fights Framer Motion — it overrides the library's
@@ -291,3 +297,29 @@
 :is(.dark) ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* Glassmorphism compatibility & transparency for global TravelStripBackground */
+.travel-strip-bg-active section:not(.hero-section),
+.travel-strip-bg-active main {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Make page containers transparent so the animated travel strip background shows through */
+.travel-strip-bg-active div[class*="bg-[#070B1A]"],
+.travel-strip-bg-active div[class*="bg-[#050816]"],
+.travel-strip-bg-active div[class*="bg-[#0c1222]"],
+.travel-strip-bg-active div[class*="bg-surface-950"],
+.travel-strip-bg-active div[class*="bg-surface-900"] {
+  background-color: transparent !important;
+}
+
+/* Ensure glassmorphism cards remain readable with a slightly stronger backdrop-filter/glass effect on dark background */
+.travel-strip-bg-active .backdrop-blur-2xl,
+.travel-strip-bg-active .backdrop-blur-xl,
+.travel-strip-bg-active .backdrop-blur-lg {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+}
+

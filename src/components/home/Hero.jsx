@@ -1,7 +1,15 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef } from 'react'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { useRef, useEffect, useState } from 'react'
 import SearchBar from '../common/SearchBar'
 import AirplaneAnimation from './AirplaneAnimation'
+
+const slides = [
+  'https://images.unsplash.com/photo-1541849546-216509041214?q=80&w=1600', // Prague
+  'https://images.unsplash.com/photo-1599946347371-68eb71b16afc?q=80&w=1600', // Berlin
+  'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1600', // Paris
+  'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?q=80&w=1600', // Madrid
+  'https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?q=80&w=1600'  // Milan
+]
 
 export default function Hero() {
   const ref = useRef(null)
@@ -14,26 +22,42 @@ export default function Hero() {
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '35%'])
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
+  // Slideshow logic (changes image every 7 seconds)
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length)
+    }, 7000)
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <section ref={ref} className="relative min-h-screen flex items-center overflow-hidden bg-slate-950">
-      {/* 🌅 Cinematic Aerial Ocean/Islands Sunset Parallax Background */}
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover select-none pointer-events-none"
-        >
-          <source
-            src="https://assets.mixkit.co/videos/preview/mixkit-beautiful-tropical-beach-aerial-shot-11756-large.mp4"
-            type="video/mp4"
+      {/* 🌅 Cinematic Destination Background Slideshow with Parallax & Ken Burns Effect */}
+      <motion.div style={{ y }} className="absolute inset-0 z-0 select-none pointer-events-none">
+        <AnimatePresence mode="popLayout">
+          <motion.img
+            key={current}
+            src={slides[current]}
+            initial={{ opacity: 0, scale: 1.15 }}
+            animate={{ opacity: 1, scale: 1.02 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 1.8, ease: 'easeInOut' },
+              scale: { duration: 7.2, ease: 'easeOut' }
+            }}
+            className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.85] contrast-[1.02]"
+            alt="Cinematic Travel Destination"
           />
-          Your browser does not support the video tag.
-        </video>
-        {/* Luxury gradient overlay: deep navy/black on the left for text legibility, fading to transparent on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/20" />
+        </AnimatePresence>
+
+        {/* Preload next image for seamless zero-lag transition */}
+        <link rel="preload" as="image" href={slides[(current + 1) % slides.length]} />
+
+        {/* Subtle Dark Overlays (20–25%) for high text readability while preserving full landmark visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20 z-10" />
       </motion.div>
 
       {/* Ambient background glows for glassmorphism pop */}
