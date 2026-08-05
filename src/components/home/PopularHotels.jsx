@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import HotelCard from '../cards/HotelCard'
 import useFetch from '../../hooks/useFetch'
 import { staggerContainer, staggerChild } from '../../utils/transitions'
 
 export default function PopularHotels() {
+  const { t } = useTranslation()
   const { data: hotels = [], loading } = useFetch('/hotels')
   const popular = [...hotels].sort((a, b) => b.rating - a.rating).slice(0, 3)
 
@@ -20,13 +22,13 @@ export default function PopularHotels() {
         >
           <motion.span variants={staggerChild} className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 dark:bg-primary-500/10 border border-primary-100/50 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
             <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse-soft" />
-            Where to Stay
+            {t('hotels.title', 'Featured Luxury Hotels')}
           </motion.span>
           <motion.h2 variants={staggerChild} className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-surface-900 dark:text-white mb-4 font-heading tracking-tight">
-            Popular Hotels
+            {t('hotels.title', 'Featured Luxury Hotels')}
           </motion.h2>
           <motion.p variants={staggerChild} className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-base sm:text-lg">
-            Luxury accommodations handpicked for comfort, location, and unforgettable experiences
+            {t('hotels.subtitle', 'Top rated accommodations offering World-class comfort and service.')}
           </motion.p>
         </motion.div>
 

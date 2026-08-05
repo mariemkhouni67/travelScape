@@ -2,9 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiSearch, FiMapPin } from 'react-icons/fi'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { springSnappy } from '../../utils/transitions'
 
-export default function SearchBar({ placeholder = 'Search destinations, hotels...', onSearch, className = '', variant = 'default' }) {
+export default function SearchBar({ placeholder, onSearch, className = '', variant = 'default' }) {
+  const { t } = useTranslation()
+  const defaultPlaceholder = t('search.destinationPlaceholder', 'Where do you want to go?')
+  const resolvedPlaceholder = placeholder || defaultPlaceholder
   const [query, setQuery] = useState('')
   const [focused, setFocused] = useState(false)
   const navigate = useNavigate()
@@ -44,7 +48,7 @@ export default function SearchBar({ placeholder = 'Search destinations, hotels..
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               className="w-full py-3 text-surface-800 dark:text-white bg-transparent outline-none placeholder-surface-400 dark:placeholder-slate-400 text-base font-light"
             />
           </div>
@@ -55,7 +59,7 @@ export default function SearchBar({ placeholder = 'Search destinations, hotels..
             className="px-8 py-3.5 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold rounded-xl shadow-lg shadow-primary-500/20 hover:shadow-primary-500/35 transition-all duration-300 flex items-center gap-2 cursor-pointer"
           >
             <FiSearch className="w-4 h-4" />
-            <span className="hidden sm:inline">Search</span>
+            <span className="hidden sm:inline">{t('search.searchButton', 'Search')}</span>
           </motion.button>
         </motion.div>
       </motion.form>
@@ -73,15 +77,15 @@ export default function SearchBar({ placeholder = 'Search destinations, hotels..
         transition={{ duration: 0.2 }}
         className="relative rounded-xl"
       >
-        <FiSearch className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-primary-500' : 'text-surface-400 dark:text-slate-400'}`} />
+        <FiSearch className={`absolute ltr:left-4 rtl:right-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused ? 'text-primary-500' : 'text-surface-400 dark:text-slate-400'}`} />
         <input
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); if (onSearch) onSearch(e.target.value) }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder={placeholder}
-          className="w-full pl-11 pr-4 py-3 bg-white/80 dark:bg-surface-800/60 border border-surface-200 dark:border-surface-700/80 rounded-xl text-sm text-surface-800 dark:text-white placeholder-surface-400 dark:placeholder-slate-400 focus:border-primary-500 dark:focus:border-primary-400 outline-none transition-colors duration-200 shadow-sm"
+          placeholder={resolvedPlaceholder}
+          className="w-full ltr:pl-11 ltr:pr-4 rtl:pr-11 rtl:pl-4 py-3 bg-white/80 dark:bg-surface-800/60 border border-surface-200 dark:border-surface-700/80 rounded-xl text-sm text-surface-800 dark:text-white placeholder-surface-400 dark:placeholder-slate-400 focus:border-primary-500 dark:focus:border-primary-400 outline-none transition-colors duration-200 shadow-sm"
         />
       </motion.div>
     </form>

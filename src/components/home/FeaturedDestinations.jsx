@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import DestinationCard from '../cards/DestinationCard'
 import useFetch from '../../hooks/useFetch'
 import { staggerContainer, staggerChild } from '../../utils/transitions'
 
 export default function FeaturedDestinations() {
+  const { t } = useTranslation()
   const { data, loading } = useFetch('/destinations')
   const destinations = Array.isArray(data) ? data : []
   const featured = destinations.filter(d => d.featured).slice(0, 4)
@@ -62,13 +64,13 @@ export default function FeaturedDestinations() {
         >
           <motion.span variants={staggerChild} className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 dark:bg-primary-500/10 border border-primary-100/50 dark:border-primary-500/30 text-primary-600 dark:text-primary-400 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
             <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse-soft" />
-            Top Picks
+            {t('destinations.title', 'Popular Destinations')}
           </motion.span>
           <motion.h2 variants={staggerChild} className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-surface-900 dark:text-white mb-4 font-heading tracking-tight">
-            Featured Destinations
+            {t('destinations.title', 'Featured Destinations')}
           </motion.h2>
           <motion.p variants={staggerChild} className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-base sm:text-lg">
-            Handpicked destinations that offer unforgettable experiences and breathtaking views
+            {t('destinations.subtitle', 'Discover hand-picked luxury spots with flight and hotel packages.')}
           </motion.p>
         </motion.div>
 

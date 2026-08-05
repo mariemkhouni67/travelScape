@@ -4,26 +4,27 @@ import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa'
 import { RiCompassDiscoverLine } from 'react-icons/ri'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { fadeUp, staggerContainer } from '../../utils/transitions'
 
 const footerLinks = {
   Destinations: [
-    { label: 'Europe', path: '/destinations?location=Europe' },
-    { label: 'Asia', path: '/destinations?location=Asia' },
-    { label: 'Americas', path: '/destinations?location=Americas' },
-    { label: 'Africa', path: '/destinations?location=Africa' },
+    { label: 'Europe', path: '/destinations' },
+    { label: 'Asia', path: '/destinations' },
+    { label: 'Americas', path: '/destinations' },
+    { label: 'Africa', path: '/destinations' },
   ],
   Company: [
-    { label: 'About Us', path: '/contact' },
+    { label: 'About Us', path: '/about' },
     { label: 'Contact', path: '/contact' },
-    { label: 'Careers', path: '#' },
-    { label: 'Press', path: '#' },
+    { label: 'Careers', path: '/careers' },
+    { label: 'Press', path: '/press' },
   ],
   Support: [
-    { label: 'Help Center', path: '#' },
-    { label: 'Cancellation', path: '#' },
-    { label: 'Safety', path: '#' },
-    { label: 'Terms', path: '#' },
+    { label: 'Help Center', path: '/help' },
+    { label: 'Cancellation', path: '/cancellation' },
+    { label: 'Safety', path: '/safety' },
+    { label: 'Terms', path: '/terms' },
   ],
 }
 
@@ -56,6 +57,7 @@ function SocialIcon({ social }) {
 }
 
 export default function Footer() {
+  const { t } = useTranslation()
   return (
     <footer 
       style={{
@@ -94,7 +96,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-white/72 leading-relaxed max-w-sm font-light">
-              Discover extraordinary destinations and create unforgettable memories. Your next adventure starts with TravelScape.
+              {t('footer.tagline', 'Crafting unforgettable luxury travel experiences around the globe.')}
             </p>
             <div className="space-y-3.5 pt-2">
               {[
@@ -140,7 +142,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8">
           <p className="text-xs sm:text-sm text-white/72 font-light">
-            © {new Date().getFullYear()} TravelScape. All rights reserved. Built with passion for explorers.
+            {t('footer.copyright', `© ${new Date().getFullYear()} TravelScape Inc. All rights reserved.`)}
           </p>
           <div className="flex items-center gap-3.5">
             {socialLinks.map((social) => (

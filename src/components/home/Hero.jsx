@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import SearchBar from '../common/SearchBar'
 import AirplaneAnimation from './AirplaneAnimation'
 
@@ -12,6 +13,7 @@ const slides = [
 ]
 
 export default function Hero() {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -88,7 +90,7 @@ export default function Hero() {
             >
               <span className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full text-white text-xs font-semibold uppercase tracking-wider shadow-xl">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                ✈️ Premium Luxury Travel
+                ✈️ {t('hero.badge', 'Premium Luxury Travel')}
               </span>
             </motion.div>
 
@@ -99,12 +101,10 @@ export default function Hero() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white leading-[1.1] mb-6 font-heading tracking-tight"
             >
-              Your Next <br />
+              {t('hero.titlePrefix', 'Explore The World In')} <br />
               <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">
-                Adventure
-              </span>{' '}
-              <br />
-              Starts Here
+                {t('hero.titleHighlight', 'Unrivaled Luxury')}
+              </span>
             </motion.h1>
 
             {/* Subheading copy */}
@@ -114,7 +114,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-base sm:text-lg text-slate-300 mb-8 max-w-xl leading-relaxed font-light"
             >
-              Experience ultra-luxury travel curated for the modern explorer. Discover breathtaking destinations, bespoke accommodations, and seamless flights.
+              {t('hero.subtitle', 'Book 5-star hotels, luxury flights, premium car rentals, and curated experiences worldwide.')}
             </motion.p>
 
             {/* Interactive Search Widget */}
@@ -144,11 +144,11 @@ export default function Hero() {
             <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
             <div className="grid grid-cols-3 divide-x divide-white/10 relative z-10">
               {[
-                { label: 'Destinations', value: '500+' },
-                { label: 'Hotels', value: '1,200+' },
-                { label: 'Happy Guests', value: '50K+' },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center px-3">
+                { label: t('hero.statDestinations', 'Destinations'), value: '500+' },
+                { label: t('hero.statHotels', 'Hotels'), value: '1,200+' },
+                { label: t('hero.statTravelers', 'Happy Guests'), value: '50K+' },
+              ].map((stat, i) => (
+                <div key={i} className="text-center px-3">
                   <p className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-none mb-1.5 font-heading">
                     {stat.value}
                   </p>

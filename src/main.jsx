@@ -5,6 +5,7 @@ import { MotionConfig } from 'framer-motion'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import App from './App.jsx'
+import './i18n.js'
 import './index.css'
 
 class ErrorBoundary extends Component {

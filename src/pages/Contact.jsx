@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiMail, FiUser, FiMessageSquare, FiMapPin, FiPhone } from 'react-icons/fi'
+import { useTranslation } from 'react-i18next'
 import Button from '../components/common/Button'
 import { fadeUp, staggerContainer, staggerChild } from '../utils/transitions'
 
 export default function Contact() {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' })
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -30,10 +32,10 @@ export default function Contact() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-surface-900 dark:text-white mb-4 font-heading">
-            Get in Touch
+            {t('contact.title', 'Get In Touch')}
           </h1>
           <p className="text-surface-500 dark:text-slate-400 max-w-2xl mx-auto text-lg font-light">
-            Have questions about a booking? Want to partner with us? We'd love to hear from you.
+            {t('contact.subtitle', 'Our concierge team is available 24/7 to assist with your luxury travel requests.')}
           </p>
         </motion.div>
 
@@ -46,7 +48,7 @@ export default function Contact() {
             viewport={{ once: true, margin: '-50px' }}
             className="space-y-8"
           >
-            <motion.h2 variants={staggerChild} className="text-2xl font-bold text-surface-900 dark:text-white mb-6">Contact Information</motion.h2>
+            <motion.h2 variants={staggerChild} className="text-2xl font-bold text-surface-900 dark:text-white mb-6">{t('contact.title', 'Contact Information')}</motion.h2>
             <div className="space-y-6">
               {[
                 {
@@ -113,41 +115,41 @@ export default function Contact() {
             transition={{ delay: 0.3 }}
             className="bg-white dark:bg-surface-850/80 dark:backdrop-blur-xl p-8 rounded-3xl shadow-premium border border-surface-200 dark:border-surface-700/60"
           >
-            <h2 className="text-2xl font-bold text-surface-900 dark:text-white mb-6">Send us a Message</h2>
+            <h2 className="text-2xl font-bold text-surface-900 dark:text-white mb-6">{t('contact.title', 'Send us a Message')}</h2>
             {status === 'success' && (
               <div className="mb-6 p-4 bg-success-500/10 border border-success-500/20 text-success-600 dark:text-success-400 rounded-xl text-sm font-semibold">
-                Thank you for your message! We'll get back to you shortly.
+                {t('contact.success', "Thank you! Your message has been sent successfully.")}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">Name</label>
+                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">{t('contact.name', 'Full Name')}</label>
                 <div className="relative">
-                  <FiUser className="absolute left-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
+                  <FiUser className="absolute ltr:left-4 rtl:right-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="input-field pl-11"
+                    className="input-field ltr:pl-11 rtl:pr-11"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">Email</label>
+                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">{t('contact.email', 'Email Address')}</label>
                 <div className="relative">
-                  <FiMail className="absolute left-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
+                  <FiMail className="absolute ltr:left-4 rtl:right-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    className="input-field pl-11"
+                    className="input-field ltr:pl-11 rtl:pr-11"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">Subject</label>
+                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">{t('contact.subject', 'Subject')}</label>
                 <input
                   type="text"
                   required
@@ -157,20 +159,20 @@ export default function Contact() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">Message</label>
+                <label className="block text-sm font-semibold text-surface-700 dark:text-slate-300 mb-1.5">{t('contact.message', 'Message')}</label>
                 <div className="relative">
-                  <FiMessageSquare className="absolute left-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
+                  <FiMessageSquare className="absolute ltr:left-4 rtl:right-4 top-3.5 w-4 h-4 text-surface-400 dark:text-slate-400" />
                   <textarea
                     rows="4"
                     required
                     value={formData.message}
                     onChange={e => setFormData({ ...formData, message: e.target.value })}
-                    className="input-field pl-11 resize-none"
+                    className="input-field ltr:pl-11 rtl:pr-11 resize-none"
                   ></textarea>
                 </div>
               </div>
               <Button type="submit" className="w-full mt-6" size="lg" loading={loading}>
-                Send Message
+                {t('contact.send', 'Send Message')}
               </Button>
             </form>
           </motion.div>
@@ -179,3 +181,4 @@ export default function Contact() {
     </div>
   )
 }
+

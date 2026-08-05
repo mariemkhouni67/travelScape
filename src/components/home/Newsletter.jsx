@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { FiSend, FiMail, FiCheck, FiCompass, FiShield, FiTrendingUp } from 'react-icons/fi'
 
 export default function Newsletter() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -13,12 +15,12 @@ export default function Newsletter() {
     
     // Simple email validation
     if (!email) {
-      setError('Please enter your email address.')
+      setError(t('common.validationRequired', 'Please enter your email address.'))
       return
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.')
+      setError(t('common.invalidEmail', 'Please enter a valid email address.'))
       return
     }
 
@@ -106,16 +108,11 @@ export default function Newsletter() {
               </motion.span>
 
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15] font-heading">
-                <span className="inline-block">Inspiring</span>{' '}
-                <span className="inline-block">Destinations</span>{' '}
-                <br />
-                <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-sky-200 to-indigo-300">
-                  Delivered Weekly.
-                </span>
+                {t('newsletter.title', 'Get Secret Deals & VIP Discounts')}
               </h2>
 
               <p className="text-slate-350 text-base sm:text-lg max-w-xl leading-relaxed font-light">
-                Join our premium community of 50,000+ wanderlust enthusiasts. Discover hidden gems, save big on top hotels, and master the art of seamless travel.
+                {t('newsletter.subtitle', 'Subscribe to our exclusive newsletter and save up to 40% on your next trip.')}
               </p>
 
               {/* Benefits Checklist */}
@@ -177,13 +174,13 @@ export default function Newsletter() {
                           <input
                             id="newsletter-email"
                             type="email"
-                            placeholder="Enter your email address"
+                            placeholder={t('newsletter.emailPlaceholder', 'Enter your email address')}
                             value={email}
                             onChange={(e) => {
                               setEmail(e.target.value)
                               if (error) setError('')
                             }}
-                            className={`w-full pl-12 pr-5 py-4.5 rounded-xl border text-white placeholder-slate-400 text-sm focus:outline-none transition-all duration-300 bg-white/5 ${
+                            className={`w-full ltr:pl-12 ltr:pr-5 rtl:pr-12 rtl:pl-5 py-4.5 rounded-xl border text-white placeholder-slate-400 text-sm focus:outline-none transition-all duration-300 bg-white/5 ${
                               error 
                                 ? 'border-error-500/60 focus:border-error-500/80 focus:ring-1 focus:ring-error-500/40' 
                                 : 'border-white/10 hover:border-white/20 focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/30'
@@ -191,7 +188,7 @@ export default function Newsletter() {
                             aria-invalid={!!error}
                             aria-describedby={error ? "newsletter-error" : undefined}
                           />
-                          <FiMail className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-450 w-4.5 h-4.5 pointer-events-none" />
+                          <FiMail className="absolute ltr:left-4.5 rtl:right-4.5 top-1/2 -translate-y-1/2 text-slate-450 w-4.5 h-4.5 pointer-events-none" />
                         </div>
                         {error && (
                           <motion.p
@@ -226,12 +223,12 @@ export default function Newsletter() {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                               </svg>
-                              Subscribing...
+                              {t('newsletter.submitting', 'Subscribing...')}
                             </>
                           ) : (
                             <>
-                              Subscribe Now
-                              <FiSend className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                              {t('newsletter.subscribe', 'Subscribe Now')}
+                              <FiSend className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:rotate-180" />
                             </>
                           )}
                         </span>

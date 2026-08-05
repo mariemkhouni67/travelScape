@@ -6,6 +6,8 @@ import {
   FiNavigation2, FiSend
 } from 'react-icons/fi'
 
+import { useTranslation } from 'react-i18next'
+
 const tabItems = [
   { id: 'flights', label: 'Flights', icon: FiNavigation },
   { id: 'hotels', label: 'Hotels', icon: FiHome },
@@ -16,6 +18,7 @@ const tabItems = [
 ]
 
 export default function BookingSearchSystem() {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('flights')
   
   // Custom Autocomplete / Dropdown states
@@ -96,7 +99,7 @@ export default function BookingSearchSystem() {
               )}
               <span className="relative z-10 flex items-center gap-2">
                 <Icon className="w-4 h-4" />
-                {tab.label}
+                {t(`search.tab${tab.id.charAt(0).toUpperCase() + tab.id.slice(1)}`, tab.label)}
               </span>
             </button>
           )

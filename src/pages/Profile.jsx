@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { FiUser, FiMail, FiEdit2 } from 'react-icons/fi'
 import Button from '../components/common/Button'
 import bookingService from '../services/bookingService'
 import { staggerContainer, staggerChild } from '../utils/transitions'
 
 export default function Profile() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -29,17 +31,14 @@ export default function Profile() {
     <div className="min-h-screen pt-24 pb-16 bg-white dark:bg-[#070B1A] text-surface-900 dark:text-white transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <h1 className="text-4xl font-bold text-surface-900 dark:text-white font-heading tracking-tight">My Profile</h1>
+          <h1 className="text-4xl font-bold text-surface-900 dark:text-white font-heading tracking-tight">
+            {t('profile.title', 'My Profile')}
+          </h1>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Details */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-1"
-          >
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-1">
             <div className="bg-white dark:bg-surface-850/80 dark:backdrop-blur-xl rounded-3xl p-6 shadow-premium border border-surface-200 dark:border-surface-700/60">
               <div className="text-center mb-6">
                 <div className="w-24 h-24 bg-gradient-to-br from-primary-400 to-accent-500 rounded-full flex items-center justify-center mx-auto mb-4 relative group shadow-lg">
@@ -61,33 +60,24 @@ export default function Profile() {
                   <span className="text-surface-750 dark:text-slate-200 font-medium">{user?.email}</span>
                 </div>
               </div>
-              <Button variant="outline" className="w-full mt-6 font-bold">Edit Profile</Button>
+              <Button variant="outline" className="w-full mt-6 font-bold">{t('profile.editProfile', 'Edit Profile')}</Button>
             </div>
           </motion.div>
 
           {/* Bookings */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-2"
-          >
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2">
             <div className="bg-white dark:bg-surface-850/80 dark:backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-premium border border-surface-200 dark:border-surface-700/60">
-              <h2 className="text-2xl font-bold text-surface-900 dark:text-white mb-6 font-heading">Booking History</h2>
-              
+              <h2 className="text-2xl font-bold text-surface-900 dark:text-white mb-6 font-heading">
+                {t('profile.bookingHistory', 'Booking History')}
+              </h2>
               <div className="space-y-4">
                 {loading ? (
                   <div className="text-center py-8 text-surface-500 dark:text-slate-400 font-light">
                     <div className="w-8 h-8 border-3 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                    Loading bookings...
+                    {t('common.loading', 'Loading...')}
                   </div>
                 ) : bookings.length > 0 ? (
-                  <motion.div
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                    className="space-y-4"
-                  >
+                  <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-4">
                     {bookings.map(booking => (
                       <motion.div
                         key={booking._id}
@@ -100,7 +90,7 @@ export default function Profile() {
                             <span className="text-xs text-surface-500 dark:text-slate-400 font-light">{new Date(booking.createdAt).toLocaleDateString()}</span>
                           </div>
                           <h3 className="font-bold text-surface-900 dark:text-white">
-                            {booking.refId?.name || booking.refId?.airline || 'Booking Ref'}
+                            {booking.refId?.name || booking.refId?.airline || t('profile.bookingRef', 'Booking Ref')}
                           </h3>
                         </div>
                         <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2">
@@ -118,7 +108,7 @@ export default function Profile() {
                   </motion.div>
                 ) : (
                   <div className="text-center py-10 text-surface-500 dark:text-slate-400 border border-dashed border-surface-200 dark:border-surface-700/60 rounded-2xl font-light">
-                    No bookings found.
+                    {t('profile.noBookings', 'No bookings found.')}
                   </div>
                 )}
               </div>
