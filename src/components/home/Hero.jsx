@@ -34,6 +34,12 @@ export default function Hero() {
     return () => clearInterval(timer)
   }, [])
 
+  // Preload next image to ensure seamless zero-lag transitions
+  useEffect(() => {
+    const img = new Image()
+    img.src = slides[(current + 1) % slides.length]
+  }, [current])
+
   return (
     <section ref={ref} className="relative min-h-screen flex items-center overflow-hidden bg-slate-950">
       {/* 🌅 Cinematic Destination Background Slideshow with Parallax & Ken Burns Effect */}
@@ -42,6 +48,8 @@ export default function Hero() {
           <motion.img
             key={current}
             src={slides[current]}
+            fetchPriority="high"
+            decoding="async"
             initial={{ opacity: 0, scale: 1.15 }}
             animate={{ opacity: 1, scale: 1.02 }}
             exit={{ opacity: 0 }}
@@ -54,17 +62,14 @@ export default function Hero() {
           />
         </AnimatePresence>
 
-        {/* Preload next image for seamless zero-lag transition */}
-        <link rel="preload" as="image" href={slides[(current + 1) % slides.length]} />
-
         {/* Subtle Dark Overlays (20–25%) for high text readability while preserving full landmark visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/40 to-transparent z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20 z-10" />
       </motion.div>
 
       {/* Ambient background glows for glassmorphism pop */}
-      <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
       {/* ✈️ Photorealistic 3D Airplane Animation Layer */}
       <AirplaneAnimation />

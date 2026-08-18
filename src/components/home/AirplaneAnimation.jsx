@@ -3,9 +3,10 @@
  * ────────────────────────────────────────────────────────────
  * Loads the photorealistic Boeing 787 / Airbus A350 aircraft asset (/dreamliner_jet.png)
  * and animates it in a luxury, cinematic 3D loop constrained to the right side of the screen.
+ * Optimized: Uses direct DOM mutations via refs inside requestAnimationFrame to avoid React overhead.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
 // ─── Trail Canvas Renderer ───────────────────────────────────────────────────
@@ -26,27 +27,30 @@ function useContrailCanvas(canvasRef) {
         zDepth,
       })
     }
-    if (particles.current.length > 500) particles.current.shift()
+    // Cap particles at 200 to save CPU/GPU
+    if (particles.current.length > 200) {
+      // Remove dead ones first, then oldest
+      particles.current = particles.current.filter(p => p.life > 0)
+      while (particles.current.length > 200) {
+        particles.current.shift()
+      }
+    }
   }, [])
 
   const drawTrail = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Sort by depth so background contrails render behind the plane/foreground contrails
-    particles.current.sort((a, b) => a.zDepth - b.zDepth)
+    // Only draw alive particles, avoid sorting every frame to save CPU
     particles.current = particles.current.filter(p => p.life > 0)
 
     for (const p of particles.current) {
-      const depthBlur = p.zDepth < 0 ? Math.abs(p.zDepth) * 4.5 : 0
       const depthFade = p.zDepth < 0 ? 1 - Math.abs(p.zDepth) * 0.45 : 1
       const finalAlpha = p.alpha * p.life * depthFade
 
       ctx.save()
-      if (depthBlur > 0.4) ctx.filter = `blur(${depthBlur}px)`
-
       const r = p.radius * 6.5
       const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
       g.addColorStop(0, `rgba(255, 255, 255, ${finalAlpha * 0.95})`)
@@ -73,11 +77,12 @@ export default function AirplaneAnimation() {
   const containerRef = useRef(null)
   const canvasRef = useRef(null)
   const rafRef = useRef(null)
-  const scaleRef = useRef(1)
-
-  const [planePos, setPlanePos] = useState({ x: 0, y: 0, z: 0, yaw: 0, pitch: 0, roll: 0 })
-  const [scale, setScale] = useState(1)
-  const [motionBlur, setMotionBlur] = useState(0)
+  
+  // DOM Refs for direct manipulation to bypass React render cycle
+  const shadowRef = useRef(null)
+  const planePositionerRef = useRef(null)
+  const planeRotatorRef = useRef(null)
+  const planeImgRef = useRef(null)
 
   const { addParticle, drawTrail } = useContrailCanvas(canvasRef)
 
@@ -89,6 +94,16 @@ export default function AirplaneAnimation() {
 
     let W = container.offsetWidth
     let H = container.offsetHeight
+    let scale = 1
+
+    let isVisible = true
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0].isIntersecting
+      },
+      { threshold: 0 }
+    )
+    observer.observe(container)
 
     const syncCanvas = () => {
       if (!containerRef.current || !canvasRef.current) return
@@ -98,17 +113,19 @@ export default function AirplaneAnimation() {
       canvasRef.current.height = H
 
       // Responsive scale multiplier (plane occupies ~35-45% of right side)
-      const sf = W < 640 ? 0.45 : W < 1024 ? 0.65 : 0.95
-      scaleRef.current = sf
-      setScale(sf)
+      scale = W < 640 ? 0.45 : W < 1024 ? 0.65 : 0.95
     }
 
-    window.addEventListener('resize', syncCanvas)
+    // Debounced resize
+    let resizeTimer
+    const handleResize = () => {
+      cancelAnimationFrame(resizeTimer)
+      resizeTimer = requestAnimationFrame(syncCanvas)
+    }
+    window.addEventListener('resize', handleResize, { passive: true })
     syncCanvas()
 
     // ── Flight Path ───────────────────────────────────────────────────────
-    // Constrains the loop entirely to the right side of the screen.
-    // Center is set to 75% of screen width, radius is 12% of screen width.
     const DURATION = 14000 // 14 seconds premium slow cinematic loop
 
     const getPos = (t) => {
@@ -132,6 +149,10 @@ export default function AirplaneAnimation() {
     let sPitch = 0, sRoll = 0, sYaw = 0, sBlur = 0
 
     function loop(now) {
+      rafRef.current = requestAnimationFrame(loop)
+      
+      if (!isVisible) return // Pause animation when off-screen
+
       if (!startTime) startTime = now
       const t = ((now - startTime) % DURATION) / DURATION
 
@@ -144,14 +165,11 @@ export default function AirplaneAnimation() {
       const pdx = pos.x - posP.x, pdy = pos.y - posP.y, pdz = pos.z - posP.z
 
       // ── Calculate Rotations ──────────────────────────────────────────────
-      // Yaw: heading direction in horizontal-depth space
       let yaw = Math.atan2(dz, dx) * (180 / Math.PI)
       
-      // Pitch: climb/descent angle
       const horizSpeed = Math.sqrt(dx * dx + dz * dz) || 0.001
       const targetPitch = Math.max(-20, Math.min(20, Math.atan2(dy, horizSpeed) * (180 / Math.PI) * 1.5))
 
-      // Roll: bank into curves
       const curHeading = Math.atan2(dy, dx)
       const prevHeading = Math.atan2(pdy, pdx)
       let dHead = curHeading - prevHeading
@@ -159,7 +177,6 @@ export default function AirplaneAnimation() {
       if (dHead < -Math.PI) dHead += 2 * Math.PI
       const targetRoll = Math.max(-30, Math.min(30, dHead * (180 / Math.PI) * 12))
 
-      // Motion blur proportional to coordinate velocity
       const speed = Math.sqrt(dx * dx + dy * dy)
       const targetBlur = Math.max(0, (speed - 1.5) * 0.15)
 
@@ -169,44 +186,67 @@ export default function AirplaneAnimation() {
       sYaw += (yaw - sYaw) * 0.1
       sBlur += (targetBlur - sBlur) * 0.1
 
-      setPlanePos({ x: pos.x, y: pos.y, z: pos.z, yaw: sYaw, pitch: sPitch, roll: sRoll })
-      setMotionBlur(sBlur)
+      // ── Direct DOM Mutations ─────────────────────────────────────────────
+      const currentScale = scale * (1 + 0.35 * pos.z)
+      const depthBlur = pos.z < 0 ? Math.abs(pos.z) * 2.2 : 0
+      const totalBlur = Math.min(3.0, depthBlur + sBlur)
+      const brightness = 1 + pos.z * 0.15
+      const contrast = 1 + pos.z * 0.08
+
+      if (planePositionerRef.current) {
+        planePositionerRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`
+      }
+      
+      if (planeRotatorRef.current) {
+        planeRotatorRef.current.style.transform = `
+          translate(-50%, -50%)
+          perspective(800px)
+          rotateY(${sYaw}deg)
+          rotateX(${sPitch}deg)
+          rotateZ(${sRoll}deg)
+        `
+        planeRotatorRef.current.style.filter = `blur(${totalBlur}px) brightness(${brightness}) contrast(${contrast})`
+      }
+
+      if (planeImgRef.current) {
+        planeImgRef.current.style.width = `${380 * currentScale}px`
+      }
+
+      // Shadow DOM
+      if (shadowRef.current) {
+        const shadowW = 380 * currentScale
+        const shadowH = 70 * currentScale
+        const shadowX = pos.x - 30 * currentScale
+        const shadowY = pos.y + (130 - pos.z * 30) * currentScale
+        const shadowOpa = 0.15 * (1 + pos.z * 0.3)
+        const shadowBlr = 16 + (1 - pos.z) * 8
+
+        shadowRef.current.style.transform = `translate3d(${shadowX}px, ${shadowY}px, 0) translate(-50%, -50%) rotate(${sYaw}deg)`
+        shadowRef.current.style.width = `${shadowW}px`
+        shadowRef.current.style.height = `${shadowH}px`
+        shadowRef.current.style.opacity = shadowOpa
+        shadowRef.current.style.filter = `blur(${shadowBlr}px)`
+      }
 
       // ── Contrail Emission ────────────────────────────────────────────────
-      const cs = scaleRef.current * (1 + 0.35 * pos.z)
+      const cs = scale * (1 + 0.35 * pos.z)
       const headingRad = Math.atan2(dy, dx)
       // emit contrail from the rear engines (~110px back from center at full scale)
       const trailX = pos.x + Math.cos(headingRad) * -(110 * cs)
       const trailY = pos.y + Math.sin(headingRad) * -(110 * cs)
       addParticle(trailX, trailY, cs, pos.z)
       drawTrail()
-
-      rafRef.current = requestAnimationFrame(loop)
     }
 
     rafRef.current = requestAnimationFrame(loop)
     return () => {
-      window.removeEventListener('resize', syncCanvas)
+      window.removeEventListener('resize', handleResize)
+      observer.disconnect()
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [prefersReduced, addParticle, drawTrail])
 
   if (prefersReduced) return null
-
-  // ── Depth parameters ───────────────────────────────────────────────────────
-  const currentScale = scale * (1 + 0.35 * planePos.z)
-  const depthBlur = planePos.z < 0 ? Math.abs(planePos.z) * 2.2 : 0
-  const totalBlur = Math.min(3.0, depthBlur + motionBlur)
-  const brightness = 1 + planePos.z * 0.15
-  const contrast = 1 + planePos.z * 0.08
-
-  // Ground/Ocean Shadow calculations
-  const shadowW = 380 * currentScale
-  const shadowH = 70 * currentScale
-  const shadowX = planePos.x - 30 * currentScale
-  const shadowY = planePos.y + (130 - planePos.z * 30) * currentScale
-  const shadowOpa = 0.15 * (1 + planePos.z * 0.3)
-  const shadowBlr = 16 + (1 - planePos.z) * 8
 
   return (
     <div
@@ -225,56 +265,45 @@ export default function AirplaneAnimation() {
 
       {/* Photorealistic Height-Aware Shadow */}
       <div
+        ref={shadowRef}
         style={{
           position: 'absolute',
-          left: shadowX,
-          top: shadowY,
-          width: shadowW,
-          height: shadowH,
+          left: 0, top: 0,
           background: 'rgba(0, 0, 0, 0.22)',
-          filter: `blur(${shadowBlr}px)`,
           borderRadius: '50%',
-          transform: `translate(-50%, -50%) rotate(${planePos.yaw}deg)`,
-          willChange: 'left, top, transform',
-          opacity: shadowOpa,
+          willChange: 'transform, width, height, opacity, filter',
           zIndex: 14,
         }}
       />
 
-      {/* Airplane 3D Container */}
+      {/* Airplane 3D Container Positioner */}
       <div
+        ref={planePositionerRef}
         style={{
           position: 'absolute',
-          left: planePos.x,
-          top: planePos.y,
-          transform: 'translate(-50%, -50%)',
-          willChange: 'left, top',
+          left: 0, top: 0,
+          willChange: 'transform',
           zIndex: 15,
         }}
       >
+        {/* Airplane Rotator */}
         <div
+          ref={planeRotatorRef}
           style={{
-            transform: `
-              perspective(800px)
-              rotateY(${planePos.yaw}deg)
-              rotateX(${planePos.pitch}deg)
-              rotateZ(${planePos.roll}deg)
-            `,
-            filter: `blur(${totalBlur}px) brightness(${brightness}) contrast(${contrast})`,
             willChange: 'transform, filter',
-            transition: 'filter 0.15s ease-out',
           }}
         >
           <img
+            ref={planeImgRef}
             src="/dreamliner_jet.png"
             alt="Commercial airliner"
+            decoding="async"
             style={{
-              width: 380 * currentScale,
               height: 'auto',
               display: 'block',
               background: 'transparent',
+              // Removed redundant animation: 'float 6s ease-in-out infinite' since RAF handles it
               filter: 'drop-shadow(0 25px 40px rgba(59,130,246,.35))',
-              animation: 'float 6s ease-in-out infinite',
               objectFit: 'contain',
             }}
           />
@@ -286,10 +315,10 @@ export default function AirplaneAnimation() {
               style={{
                 position: 'absolute',
                 left: '25%',
-                top: `calc(50% + ${side * 35 * currentScale}px)`,
+                top: `calc(50% + ${side * 35 * 0.65}px)`, // using an average scale for the glow positioning to avoid inline style calcs
                 transform: 'translate(-50%, -50%)',
-                width: 45 * currentScale,
-                height: 22 * currentScale,
+                width: 45 * 0.65,
+                height: 22 * 0.65,
                 borderRadius: '50%',
                 background: 'radial-gradient(ellipse, rgba(147,197,253,0.7) 0%, rgba(59,130,246,0.2) 50%, transparent 80%)',
                 filter: 'blur(5px)',
@@ -303,3 +332,4 @@ export default function AirplaneAnimation() {
     </div>
   )
 }
+

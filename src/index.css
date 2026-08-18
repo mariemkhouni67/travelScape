@@ -138,9 +138,14 @@
    * easing/spring calculations with a flat CSS transition on every frame.
    * Only non-layout/non-animation properties are safe to transition globally.
    */
-  *,
-  *::before,
-  *::after {
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  .btn,
+  .interactive-transition {
     transition-property: background-color, border-color, color, fill, stroke, box-shadow, opacity;
     transition-duration: 200ms;
     transition-timing-function: ease-out;

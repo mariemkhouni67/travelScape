@@ -7,31 +7,41 @@ import { springSoft, staggerContainer, staggerChild } from '../../utils/transiti
 const icons = [FiUsers, FiMapPin, FiHome, FiStar]
 
 function AnimatedCounter({ target, suffix = '' }) {
-  const [count, setCount] = useState(0)
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
 
   useEffect(() => {
-    if (!inView) return
+    if (!inView || !ref.current) return
+    
     const duration = 2000
-    const steps = 60
-    const increment = target / steps
-    let current = 0
-    const timer = setInterval(() => {
-      current += increment
-      if (current >= target) {
-        setCount(target)
-        clearInterval(timer)
-      } else {
-        setCount(Math.floor(current))
+    let startTime = null
+    let animationFrame
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp
+      const progress = Math.min((timestamp - startTime) / duration, 1)
+      const easeOut = 1 - Math.pow(1 - progress, 3) // cubic ease-out
+      const current = Math.floor(easeOut * target)
+      
+      if (ref.current) {
+        ref.current.textContent = current.toLocaleString() + suffix
       }
-    }, duration / steps)
-    return () => clearInterval(timer)
-  }, [inView, target])
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate)
+      }
+    }
+
+    animationFrame = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationFrame) cancelAnimationFrame(animationFrame)
+    }
+  }, [inView, target, suffix])
 
   return (
     <span ref={ref}>
-      {count.toLocaleString()}{suffix}
+      0{suffix}
     </span>
   )
 }

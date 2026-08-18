@@ -62,8 +62,11 @@ export default function TravelStripBackground() {
 
   // Soft floating particles
   const [particles, setParticles] = useState([])
+  const [isVisible, setIsVisible] = useState(true)
+
   useEffect(() => {
-    const generated = Array.from({ length: 15 }).map((_, i) => ({
+    // Generate only 8 particles to save CPU/GPU instead of 15
+    const generated = Array.from({ length: 8 }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -72,6 +75,16 @@ export default function TravelStripBackground() {
       delay: Math.random() * 5
     }))
     setParticles(generated)
+
+    // Setup intersection observer to pause animations when off-screen
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setIsVisible(entries[0].isIntersecting)
+      },
+      { threshold: 0 }
+    )
+    if (containerRef.current) observer.observe(containerRef.current)
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -97,6 +110,8 @@ export default function TravelStripBackground() {
                 src={dest.img}
                 alt={dest.name}
                 loading="lazy"
+                fetchpriority="low"
+                decoding="async"
                 initial={{ scale: 1.1 }}
                 whileInView={{ scale: 1.02 }}
                 transition={{ duration: 8, ease: 'easeOut' }}
@@ -109,8 +124,8 @@ export default function TravelStripBackground() {
             </div>
           ))}
 
-          {/* Dark Overlay (30-40%) for readability */}
-          <div className="absolute inset-0 bg-[#070B1A]/35 backdrop-blur-[2px] mix-blend-multiply pointer-events-none" />
+          {/* Dark Overlay (Replaced expensive backdrop-blur with solid semi-transparent bg) */}
+          <div className="absolute inset-0 bg-[#070B1A]/40 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#070B1A]/80 via-transparent to-[#070B1A]/80 pointer-events-none" />
 
           {/* Curved Travel Path & Waypoints SVG */}
@@ -168,7 +183,7 @@ export default function TravelStripBackground() {
               strokeDasharray="8 200"
               filter="url(#glow)"
               style={{
-                animation: 'travel-pulse 10s linear infinite',
+                animation: isVisible ? 'travel-pulse 10s linear infinite' : 'none',
                 willChange: 'stroke-dashoffset'
               }}
             />
@@ -181,8 +196,14 @@ export default function TravelStripBackground() {
               className="absolute pointer-events-none flex items-center justify-center"
               style={{ left: dest.x, top: dest.y }}
             >
-              {/* Outer Pulse */}
-              <div className="absolute w-6 h-6 rounded-full bg-white/20 border border-white/40 animate-ping duration-1000" />
+              {/* Outer Pulse - Using a lighter animation than tailwind's animate-ping */}
+              <div 
+                className="absolute w-6 h-6 rounded-full bg-white/20 border border-white/40" 
+                style={{ 
+                  animation: isVisible ? 'light-pulse 2s ease-out infinite' : 'none',
+                  willChange: 'transform, opacity' 
+                }} 
+              />
               
               {/* Waypoint Dot */}
               <div className="absolute w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)] border border-blue-400 z-10" />
@@ -198,15 +219,16 @@ export default function TravelStripBackground() {
           ))}
 
           {/* Floating Particles Overlay */}
-          {particles.map((p) => (
+          {isVisible && particles.map((p) => (
             <motion.div
               key={p.id}
-              className="absolute rounded-full bg-white/30 backdrop-blur-sm pointer-events-none"
+              className="absolute rounded-full bg-white/30 pointer-events-none"
               style={{
                 left: `${p.x}%`,
                 top: `${p.y}%`,
                 width: p.size,
                 height: p.size,
+                willChange: 'transform, opacity',
               }}
               animate={{
                 y: [0, -60, 0],
@@ -224,15 +246,15 @@ export default function TravelStripBackground() {
         </div>
       </motion.div>
 
-      {/* CSS Animation for SVG flow path */}
+      {/* CSS Animations */}
       <style>{`
         @keyframes travel-pulse {
-          0% {
-            stroke-dashoffset: 0;
-          }
-          100% {
-            stroke-dashoffset: -208;
-          }
+          0% { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -208; }
+        }
+        @keyframes light-pulse {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.5); opacity: 0; }
         }
       `}</style>
     </div>

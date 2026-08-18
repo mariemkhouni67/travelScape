@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { FiSend, FiMail, FiCheck, FiCompass, FiShield, FiTrendingUp } from 'react-icons/fi'
 
 export default function Newsletter() {
+  const sectionRef = useRef(null)
+  const inView = useInView(sectionRef, { margin: "200px" })
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,7 +44,7 @@ export default function Newsletter() {
   ]
 
   return (
-    <section className="py-32 relative overflow-hidden transition-colors duration-300">
+    <section ref={sectionRef} className="py-32 relative overflow-hidden transition-colors duration-300">
       {/* 🌫️ Soft top and bottom fades for smooth transition */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#070B1A] to-transparent pointer-events-none z-10" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#070B1A] to-transparent pointer-events-none z-10" />
@@ -63,8 +65,8 @@ export default function Newsletter() {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           style={{
             background: 'rgba(10, 16, 32, 0.40)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             borderColor: 'rgba(255, 255, 255, 0.07)',
             boxShadow: '0 24px 70px rgba(0, 0, 0, 0.16)'
           }}
@@ -78,15 +80,15 @@ export default function Newsletter() {
 
           {/* Animated floating light gradient inside the card */}
           <div 
-            className="absolute -top-32 -right-32 w-[450px] h-[450px] bg-gradient-to-br from-primary-500/10 to-accent-500/15 rounded-full blur-[100px] pointer-events-none opacity-80"
+            className="absolute -top-32 -right-32 w-[450px] h-[450px] bg-gradient-to-br from-primary-500/10 to-accent-500/15 rounded-full blur-[64px] pointer-events-none opacity-80"
             style={{
-              animation: 'floating-glow 12s ease-in-out infinite alternate'
+              animation: inView ? 'floating-glow 12s ease-in-out infinite alternate' : 'none'
             }}
           />
           <div 
-            className="absolute -bottom-32 -left-32 w-[450px] h-[450px] bg-gradient-to-tr from-coral-500/8 to-primary-500/12 rounded-full blur-[100px] pointer-events-none opacity-80"
+            className="absolute -bottom-32 -left-32 w-[450px] h-[450px] bg-gradient-to-tr from-coral-500/8 to-primary-500/12 rounded-full blur-[64px] pointer-events-none opacity-80"
             style={{
-              animation: 'floating-glow 16s ease-in-out infinite alternate-reverse'
+              animation: inView ? 'floating-glow 16s ease-in-out infinite alternate-reverse' : 'none'
             }}
           />
 
@@ -147,8 +149,8 @@ export default function Newsletter() {
                     transition={{ duration: 0.4 }}
                     style={{
                       background: 'rgba(18, 25, 45, 0.45)',
-                      backdropFilter: 'blur(18px)',
-                      WebkitBackdropFilter: 'blur(18px)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
                       borderColor: 'rgba(255, 255, 255, 0.08)',
                       boxShadow: '0 15px 35px rgba(0, 0, 0, 0.12)'
                     }}
@@ -244,8 +246,8 @@ export default function Newsletter() {
                     transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                     style={{
                       background: 'rgba(18, 25, 45, 0.45)',
-                      backdropFilter: 'blur(18px)',
-                      WebkitBackdropFilter: 'blur(18px)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
                       borderColor: 'rgba(255, 255, 255, 0.08)',
                       boxShadow: '0 15px 35px rgba(0, 0, 0, 0.12)'
                     }}

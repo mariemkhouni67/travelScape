@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FiMapPin, FiStar, FiArrowRight, FiX, FiCompass } from 'react-icons/fi'
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
@@ -211,7 +211,7 @@ function DestinationPanel({ destination, onClose }) {
 // ─────────────────────────────────────────────
 const DARK_MAP_CSS = `
   .ts-map-wrap .leaflet-tile {
-    filter: invert(100%) hue-rotate(180deg) brightness(0.82) contrast(0.85) saturate(0.85);
+    filter: invert(100%) hue-rotate(180deg) brightness(0.85);
   }
   .ts-map-wrap .leaflet-container {
     background: #070B1A !important;
@@ -250,11 +250,13 @@ export default function ExploreMap() {
   const destinations = Array.isArray(data) ? data : []
   const [selected, setSelected] = useState(null)
   const [mapReady, setMapReady] = useState(false)
+  const sectionRef = useRef(null)
+  const inView = useInView(sectionRef, { margin: "400px", once: true })
 
   const destWithCoords = destinations.filter(d => COORDS[d._id])
 
   return (
-    <section style={{ paddingTop: 80, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>
+    <section ref={sectionRef} style={{ paddingTop: 80, paddingBottom: 80, position: 'relative', overflow: 'hidden' }}>
       {/* Inject CSS */}
       <style>{DARK_MAP_CSS}</style>
 
@@ -341,38 +343,40 @@ export default function ExploreMap() {
 
           {/* Leaflet map */}
           <div className="ts-map-wrap" style={{ height: 560 }}>
-            <MapContainer
-              center={[20, 10]}
-              zoom={2}
-              style={{ width: '100%', height: '100%' }}
-              zoomControl={true}
-              whenReady={() => setMapReady(true)}
-              maxZoom={14}
-              minZoom={2}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                maxZoom={19}
-              />
-              <MapFitter destinations={destWithCoords} />
+            {inView && (
+              <MapContainer
+                center={[20, 10]}
+                zoom={2}
+                style={{ width: '100%', height: '100%' }}
+                zoomControl={true}
+                whenReady={() => setMapReady(true)}
+                maxZoom={14}
+                minZoom={2}
+                scrollWheelZoom={true}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  maxZoom={19}
+                />
+                <MapFitter destinations={destWithCoords} />
 
-              {destWithCoords.map(dest => {
-                const { lat, lng } = COORDS[dest._id]
-                const isSelected = selected?._id === dest._id
-                return (
-                  <Marker
-                    key={dest._id}
-                    position={[lat, lng]}
-                    icon={createCustomIcon(isSelected)}
-                    eventHandlers={{
-                      click: () => setSelected(isSelected ? null : dest),
-                    }}
-                  />
-                )
-              })}
-            </MapContainer>
+                {destWithCoords.map(dest => {
+                  const { lat, lng } = COORDS[dest._id]
+                  const isSelected = selected?._id === dest._id
+                  return (
+                    <Marker
+                      key={dest._id}
+                      position={[lat, lng]}
+                      icon={createCustomIcon(isSelected)}
+                      eventHandlers={{
+                        click: () => setSelected(isSelected ? null : dest),
+                      }}
+                    />
+                  )
+                })}
+              </MapContainer>
+            )}
 
             {/* Info panel */}
             <DestinationPanel destination={selected} onClose={() => setSelected(null)} />
