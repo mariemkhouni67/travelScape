@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import OpenAI from 'openai'
 import {
   FiMessageCircle,
   FiX,
@@ -21,43 +22,11 @@ import {
   RiCustomerService2Line,
 } from 'react-icons/ri'
 
-// ── Simulated AI Travel Assistant Responses ──
-const TRAVEL_RESPONSES = {
-  greeting: [
-    "Hello! ✈️ I'm TravelScape AI, your personal travel assistant. How can I help you plan your perfect trip today?",
-    "Welcome! 🌍 I'm here to help you discover amazing destinations, find the best flights, and book dream hotels. What are you looking for?",
-    "Hi there! 🏖️ Ready to explore the world? Tell me where you'd like to go, and I'll help make it happen!",
-  ],
-  flights: [
-    "Great question about flights! ✈️ We offer competitive prices on thousands of routes. You can search for flights on our Flights page — just enter your departure city, destination, and dates. Would you like me to help you find a specific route?",
-    "Looking for flights? 🛫 I'd recommend checking our Flights page for real-time pricing. We partner with major airlines to get you the best deals. Popular routes right now include Paris, Tokyo, and New York!",
-  ],
-  hotels: [
-    "We have an amazing selection of hotels! 🏨 From luxury resorts to cozy boutique stays, you'll find it all on our Hotels page. Any particular destination in mind?",
-    "Looking for accommodation? 🏩 Our hotel partners range from 3-star to 5-star properties worldwide. Check out our Hotels page for exclusive deals, or tell me your destination and I'll suggest some options!",
-  ],
-  destinations: [
-    "Oh, I love talking about destinations! 🌴 Some of our most popular picks right now are: Bali, Santorini, Tokyo, Paris, and the Maldives. Would you like details on any of these?",
-    "Exploring new places? 🗺️ Check out our Destinations page for curated travel guides. Whether you want beaches, mountains, or city vibes — we've got you covered!",
-  ],
-  pricing: [
-    "Our pricing is very competitive! 💰 Flights start from as low as $49 one-way on select routes. Hotels range from $30/night for budget options to premium luxury stays. Check our pages for real-time pricing!",
-    "Great news on pricing! 🏷️ We regularly run flash sales with up to 40% off. Subscribe to our newsletter for the latest deals. Would you like help finding something within your budget?",
-  ],
-  booking: [
-    "Booking with TravelScape is easy! 📋 Just browse our flights or hotels, select your dates, and click 'Book Now.' You'll need to create an account or sign in first. Need help with a specific booking?",
-    "Ready to book? 🎫 Here's how: 1) Choose your flight/hotel, 2) Select your dates, 3) Sign in or create an account, 4) Confirm and pay. It's that simple!",
-  ],
-  support: [
-    "I'm happy to help with support! 🛟 For urgent booking issues, please visit our Contact page. You can also email us or call our 24/7 helpline. What specific issue are you facing?",
-    "Need support? 📞 Our team is available 24/7. Head to the Contact page for all support options. For quick questions, I'm right here to help!",
-  ],
-  default: [
-    "That's a great question! 🤔 I can help with flights, hotels, destinations, bookings, and pricing. Could you tell me more about what you're looking for?",
-    "I'd love to help! 💡 Try asking me about flight deals, hotel recommendations, popular destinations, or how to book. What interests you most?",
-    "Interesting! 🌟 While I'm best at travel-related queries, I'll do my best to help. Could you rephrase or ask about flights, hotels, or destinations?",
-  ],
-}
+// ── OpenAI Setup ──
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || 'dummy_key',
+  dangerouslyAllowBrowser: true,
+})
 
 // ── Quick Suggestion Chips ──
 const QUICK_ACTIONS = [
@@ -69,30 +38,7 @@ const QUICK_ACTIONS = [
   { icon: RiCustomerService2Line, label: 'Support', key: 'support' },
 ]
 
-function getAIResponse(message) {
-  const lower = message.toLowerCase()
 
-  if (lower.match(/\b(hi|hello|hey|bonjour|salut|مرحبا|hola|ciao|hallo)\b/))
-    return pickRandom(TRAVEL_RESPONSES.greeting)
-  if (lower.match(/\b(flight|fly|plane|airline|airport|avion|vol|طيران|vuelo|flug|volo)\b/))
-    return pickRandom(TRAVEL_RESPONSES.flights)
-  if (lower.match(/\b(hotel|stay|room|accommodation|resort|hôtel|فندق|alojamiento|unterkunft|albergo)\b/))
-    return pickRandom(TRAVEL_RESPONSES.hotels)
-  if (lower.match(/\b(destination|place|where|visit|travel|explore|explore|وجهة|destino|reiseziel|destinazione)\b/))
-    return pickRandom(TRAVEL_RESPONSES.destinations)
-  if (lower.match(/\b(price|cost|cheap|budget|deal|money|prix|سعر|precio|preis|prezzo)\b/))
-    return pickRandom(TRAVEL_RESPONSES.pricing)
-  if (lower.match(/\b(book|reserve|booking|reservation|réserver|حجز|reservar|buchen|prenotare)\b/))
-    return pickRandom(TRAVEL_RESPONSES.booking)
-  if (lower.match(/\b(help|support|contact|problem|issue|aide|مساعدة|ayuda|hilfe|aiuto)\b/))
-    return pickRandom(TRAVEL_RESPONSES.support)
-
-  return pickRandom(TRAVEL_RESPONSES.default)
-}
-
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
 
 // ── Typing Indicator ──
 function TypingIndicator() {
@@ -184,42 +130,64 @@ export default function ChatBot() {
     setIsOpen(true)
     setHasUnread(false)
     if (messages.length === 0) {
-      setIsTyping(true)
-      setTimeout(() => {
-        setMessages([
-          {
-            id: Date.now(),
-            role: 'bot',
-            content: pickRandom(TRAVEL_RESPONSES.greeting),
-            time: new Date(),
-          },
-        ])
-        setIsTyping(false)
-      }, 800)
+      setMessages([
+        {
+          id: Date.now(),
+          role: 'assistant',
+          content: "Hello! ✈️ I'm TravelScape AI, your personal travel assistant. How can I help you plan your perfect trip today?",
+          time: new Date(),
+        },
+      ])
     }
   }
 
   // Send a message
-  const handleSend = (text) => {
+  const handleSend = async (text) => {
     const msg = (text || input).trim()
     if (!msg) return
 
     // Add user message
     const userMsg = { id: Date.now(), role: 'user', content: msg, time: new Date() }
-    setMessages((prev) => [...prev, userMsg])
+    const newMessages = [...messages, userMsg]
+    setMessages(newMessages)
     setInput('')
-
-    // Simulate AI typing delay
     setIsTyping(true)
-    const delay = 600 + Math.random() * 1200
-    setTimeout(() => {
-      const response = getAIResponse(msg)
-      const botMsg = { id: Date.now() + 1, role: 'bot', content: response, time: new Date() }
-      setMessages((prev) => [...prev, botMsg])
-      setIsTyping(false)
 
+    try {
+      const apiMessages = newMessages.map(m => ({
+        role: m.role,
+        content: m.content
+      }))
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are a helpful travel assistant for TravelScape. Answer concisely and politely.' },
+          ...apiMessages
+        ],
+      })
+
+      const botMsg = { 
+        id: Date.now() + 1, 
+        role: 'assistant', 
+        content: response.choices[0].message.content, 
+        time: new Date() 
+      }
+      setMessages((prev) => [...prev, botMsg])
       if (!isOpen) setHasUnread(true)
-    }, delay)
+    } catch (error) {
+      console.error('OpenAI API Error:', error)
+      const errorMsg = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: 'Sorry, I am having trouble connecting to the network or the API key is invalid. Please try again later.',
+        time: new Date()
+      }
+      setMessages((prev) => [...prev, errorMsg])
+      if (!isOpen) setHasUnread(true)
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   // Handle quick action chip click
