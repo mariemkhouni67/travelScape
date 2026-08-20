@@ -22,9 +22,10 @@ import {
   RiCustomerService2Line,
 } from 'react-icons/ri'
 
-// ── OpenAI Setup ──
+// ── OpenRouter Setup ──
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY || 'dummy_key',
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: import.meta.env.VITE_OPENROUTER_API_KEY || 'dummy_key',
   dangerouslyAllowBrowser: true,
 })
 
@@ -144,7 +145,7 @@ export default function ChatBot() {
   // Send a message
   const handleSend = async (text) => {
     const msg = (text || input).trim()
-    if (!msg) return
+    if (!msg || isTyping) return
 
     // Add user message
     const userMsg = { id: Date.now(), role: 'user', content: msg, time: new Date() }
@@ -153,41 +154,55 @@ export default function ChatBot() {
     setInput('')
     setIsTyping(true)
 
-    try {
-      const apiMessages = newMessages.map(m => ({
-        role: m.role,
-        content: m.content
-      }))
+    // Free models to try in order — fetched live from OpenRouter on 2026-08-20
+    const FREE_MODELS = [
+      'openai/gpt-oss-20b:free',
+      'nvidia/nemotron-3.5-lightning:free',
+      'google/gemma-4-31b-it:free',
+      'google/gemma-4-26b-a4b-it:free',
+      'nvidia/nemotron-3-nano-30b-a3b:free',
+    ]
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are a helpful travel assistant for TravelScape. Answer concisely and politely.' },
-          ...apiMessages
-        ],
-      })
+    const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }))
+    const systemMsg = { role: 'system', content: 'You are a helpful travel assistant for TravelScape. Answer concisely and politely.' }
 
-      const botMsg = { 
-        id: Date.now() + 1, 
-        role: 'assistant', 
-        content: response.choices[0].message.content, 
-        time: new Date() 
+    let lastError = null
+    for (const model of FREE_MODELS) {
+      try {
+        const response = await openai.chat.completions.create({
+          model,
+          messages: [systemMsg, ...apiMessages],
+        })
+        const botMsg = {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: response.choices[0].message.content,
+          time: new Date()
+        }
+        setMessages((prev) => [...prev, botMsg])
+        if (!isOpen) setHasUnread(true)
+        setIsTyping(false)
+        return
+      } catch (err) {
+        console.warn(`Model ${model} failed:`, err.message)
+        lastError = err
+        // Only retry on rate-limit (429) or unavailable (404) errors
+        if (!err.message?.includes('429') && !err.message?.includes('404') && !err.message?.includes('unavailable')) {
+          break
+        }
       }
-      setMessages((prev) => [...prev, botMsg])
-      if (!isOpen) setHasUnread(true)
-    } catch (error) {
-      console.error('OpenAI API Error:', error)
-      const errorMsg = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: 'Sorry, I am having trouble connecting to the network or the API key is invalid. Please try again later.',
-        time: new Date()
-      }
-      setMessages((prev) => [...prev, errorMsg])
-      if (!isOpen) setHasUnread(true)
-    } finally {
-      setIsTyping(false)
     }
+
+    // All models failed
+    console.error('All models failed. Last error:', lastError)
+    setMessages((prev) => [...prev, {
+      id: Date.now() + 1,
+      role: 'assistant',
+      content: `Sorry, all AI providers are currently rate-limited. Please try again in a moment. (${lastError?.message || 'Unknown error'})`,
+      time: new Date()
+    }])
+    if (!isOpen) setHasUnread(true)
+    setIsTyping(false)
   }
 
   // Handle quick action chip click
